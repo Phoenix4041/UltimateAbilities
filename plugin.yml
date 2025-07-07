@@ -1,0 +1,9 @@
+name: PartnerItemsPE
+version: 1.0
+author: JuqnGOOD
+main: juqn\partneritems\PartnerItems
+api: 5.0.0
+permissions:
+  give.partneritems:
+    description: Use for give items
+    default: op
