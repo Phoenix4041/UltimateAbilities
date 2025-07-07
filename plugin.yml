@@ -1,9 +1,13 @@
-name: PartnerItemsPE
-version: 1.0
-author: JuqnGOOD
-main: juqn\partneritems\PartnerItems
+name: UltimateAbilities
+version: 1.0.0
+author: Phoenix4041
+website: https://github.com/Phoenix4041
+main: Phoenix4041\UltimateAbilities\UltimateAbilities
 api: 5.0.0
 permissions:
-  give.partneritems:
-    description: Use for give items
+  ultimateabilities.give:
+    description: Permission to give ultimate abilities items
     default: op
+  ultimateabilities.use:
+    description: Permission to use ultimate abilities
+    default: true

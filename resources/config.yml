@@ -1,60 +1,146 @@
-Aids:
-  - "a"
-  - "b"
-  - "aids"
-Alcohol:
-  - "a"
-  - "b"
-  - "alcohol"
-CheemsStick:
-  - "a"
-  - "b"
-Cigar:
-  - "a"
-  - "b"
-Coffe:
-  - "a"
-  - "b"
-DisableEffects:
-  - "a"
-  - "b"
-Drug:
-  - "a"
-  - "b"
-Heart:
-  - "a"
-  - "b"
-MegaInstinct:
-  - "a"
-  - "b"
-Mota:
-  - "a"
-  - "b"
-Phoenix:
-  - "a"
-  - "b"
-Pots:
-  - "a"
-  - "b"
-Redbull:
-  - "a"
-  - "b"
-Resistance:
-  - "a"
-  - "b"
-StormBreaker:
-  - "a"
-  - "b"
-Strength:
-  - "a"
-  - "b"
-TeleportAttack:
-  - "a"
-  - "b"
-UltraInstinct:
-  - "a"
-  - "b"
-Weakness:
-  - "a"
-  - "b"
+# UltimateAbilities Configuration
+# Configure cooldowns and effects for each ability
 
+antipearl:
+  name: "§c§lAnti Pearl"
+  lore:
+    - "§7Bloquea el uso de ender pearls"
+    - "§7en un área durante 10 segundos"
+    - ""
+    - "§aClick derecho para usar"
+  cooldown: 30
+
+switcher:
+  name: "§b§lSwitcher"
+  lore:
+    - "§7Intercambia posiciones con"
+    - "§7el jugador que golpees"
+    - ""
+    - "§aClick derecho para usar"
+  cooldown: 25
+
+ultrainstinct:
+  name: "§d§lUltra Instinct"
+  lore:
+    - "§7Aumenta tu velocidad y"
+    - "§7reflejos durante 15 segundos"
+    - ""
+    - "§aClick derecho para usar"
+  cooldown: 60
+
+teleportattack:
+  name: "§e§lTeleport Attack"
+  lore:
+    - "§7Teletransportate detrás"
+    - "§7del jugador más cercano"
+    - ""
+    - "§aClick derecho para usar"
+  cooldown: 20
+
+strength:
+  name: "§4§lStrength"
+  lore:
+    - "§7Aumenta tu fuerza"
+    - "§7durante 30 segundos"
+    - ""
+    - "§aClick derecho para usar"
+  cooldown: 45
+
+resistance:
+  name: "§8§lResistance"
+  lore:
+    - "§7Reduce el daño recibido"
+    - "§7durante 30 segundos"
+    - ""
+    - "§aClick derecho para usar"
+  cooldown: 45
+
+redbull:
+  name: "§c§lRed Bull"
+  lore:
+    - "§7Te da alas y velocidad"
+    - "§7durante 20 segundos"
+    - ""
+    - "§aClick derecho para usar"
+  cooldown: 40
+
+antitrapper:
+  name: "§6§lAnti Trapper"
+  lore:
+    - "§7Rompe bloques en un radio"
+    - "§7de 3x3 durante 10 segundos"
+    - ""
+    - "§aClick derecho para usar"
+  cooldown: 35
+
+fenix:
+  name: "§c§lFénix"
+  lore:
+    - "§7Regenera tu vida completa"
+    - "§7y te da resistencia al fuego"
+    - ""
+    - "§aClick derecho para usar"
+  cooldown: 90
+
+megainstinct:
+  name: "§e§lMega Instinct"
+  lore:
+    - "§7Versión mejorada del"
+    - "§7Ultra Instinct con más efectos"
+    - ""
+    - "§aClick derecho para usar"
+  cooldown: 120
+
+heart:
+  name: "§c§lHeart"
+  lore:
+    - "§7Aumenta tu vida máxima"
+    - "§7temporalmente"
+    - ""
+    - "§aClick derecho para usar"
+  cooldown: 60
+
+coffee:
+  name: "§6§lCoffee"
+  lore:
+    - "§7Te da energía y velocidad"
+    - "§7de minado durante 45 segundos"
+    - ""
+    - "§aClick derecho para usar"
+  cooldown: 50
+
+alcohol:
+  name: "§5§lAlcohol"
+  lore:
+    - "§7Te da visión nocturna pero"
+    - "§7reduce tu precisión"
+    - ""
+    - "§aClick derecho para usar"
+  cooldown: 30
+
+antigapple:
+  name: "§4§lAnti Gapple"
+  lore:
+    - "§7Niega los efectos de"
+    - "§7manzanas doradas por 15 segundos"
+    - ""
+    - "§aClick derecho para usar"
+  cooldown: 25
+
+gemamente:
+  name: "§9§lGema de Mente"
+  lore:
+    - "§7Controla la mente del"
+    - "§7jugador más cercano"
+    - ""
+    - "§aClick derecho para usar"
+  cooldown: 80
+
+gemapoder:
+  name: "§a§lGema del Poder"
+  lore:
+    - "§7Otorga múltiples efectos"
+    - "§7de poder durante 20 segundos"
+    - ""
+    - "§aClick derecho para usar"
+  cooldown: 100
