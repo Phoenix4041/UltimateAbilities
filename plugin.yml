@@ -11,3 +11,6 @@ permissions:
   ultimateabilities.use:
     description: Permission to use ultimate abilities
     default: true
+  ultimateabilities.reload:
+    description: Permission to reload the plugin
+    default: op    

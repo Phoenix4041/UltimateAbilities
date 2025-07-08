@@ -1,20 +1,20 @@
 <?php
-
 declare(strict_types=1);
-
 namespace Phoenix4041\UltimateAbilities\item\abilities;
-
+use Phoenix4041\UltimateAbilities\entity\SwitcherEntity;
 use Phoenix4041\UltimateAbilities\item\AbilityItem;
 use Phoenix4041\UltimateAbilities\provider\Provider;
-use pocketmine\entity\Entity;
-use pocketmine\event\entity\EntityDamageByEntityEvent;
+use pocketmine\entity\Location;
+use pocketmine\event\entity\ProjectileHitEntityEvent;
+use pocketmine\event\Listener;
 use pocketmine\item\VanillaItems;
 use pocketmine\math\Vector3;
 use pocketmine\player\Player;
 use pocketmine\world\particle\EndermanTeleportParticle;
 use pocketmine\world\sound\EndermanTeleportSound;
+use pocketmine\event\EventPriority;
 
-class Switcher extends AbilityItem
+class Switcher extends AbilityItem implements Listener
 {
     public function __construct()
     {
@@ -27,7 +27,7 @@ class Switcher extends AbilityItem
                 "§7Intercambia posiciones con",
                 "§7el jugador que golpees",
                 "",
-                "§aGolpea a un jugador para usar"
+                "§aLanza la bola de nieve para usar"
             ]
         );
     }
@@ -39,47 +39,78 @@ class Switcher extends AbilityItem
     
     protected function execute(Player $player, Vector3 $directionVector): void
     {
-        $this->sendMessage($player, "§bGolpea a un jugador para intercambiar posiciones!");
+        $world = $player->getWorld();
+        $location = $player->getLocation();
+        
+        // USAR SwitcherEntity en lugar de Snowball normal
+        $switcherEntity = new SwitcherEntity($location, $player);
+        $switcherEntity->setMotion($directionVector->multiply(1.5));
+        $switcherEntity->spawnToAll();
+        
+        $this->sendMessage($player, "§b¡Switcher lanzado!");
     }
     
-    public function onAttack(Player $damager, Entity $victim, EntityDamageByEntityEvent $event): void
+    /**
+     * @param ProjectileHitEntityEvent $event
+     * @priority NORMAL
+     * @ignoreCancelled true
+     */
+    public function onHitByProjectile(ProjectileHitEntityEvent $event): void 
     {
-        if (!$victim instanceof Player) {
+        $entity = $event->getEntity();
+        $hit = $event->getEntityHit();
+        
+        // Solo procesar si es SwitcherEntity
+        if (!$entity instanceof SwitcherEntity) {
             return;
         }
         
-        // Check cooldown
-        if ($this->isOnCooldown($damager)) {
-            $remaining = $this->getRemainingCooldown($damager);
-            $damager->sendMessage("§cDebes esperar §e{$remaining}s §cpara usar Switcher.");
+        $player = $entity->getOwningEntity();
+        if (!$player instanceof Player || !$player->isOnline()) {
             return;
         }
         
-        $damagerPos = $damager->getPosition();
-        $victimPos = $victim->getPosition();
+        if (!$hit instanceof Player) {
+            $this->sendMessage($player, "§cSolo puedes intercambiar con otros jugadores");
+            return;
+        }
         
-        // Efectos visuales antes del intercambio
-        $damager->getWorld()->addParticle($damagerPos, new EndermanTeleportParticle());
-        $victim->getWorld()->addParticle($victimPos, new EndermanTeleportParticle());
+        // No permitir intercambio consigo mismo
+        if ($player === $hit) {
+            $this->sendMessage($player, "§cNo puedes intercambiar contigo mismo");
+            return;
+        }
         
-        $damager->getWorld()->addSound($damagerPos, new EndermanTeleportSound());
-        $victim->getWorld()->addSound($victimPos, new EndermanTeleportSound());
+        // Verificar que el jugador objetivo esté en línea
+        if (!$hit->isOnline()) {
+            $this->sendMessage($player, "§cEl jugador objetivo no está en línea");
+            return;
+        }
+        
+        // Obtener posiciones
+        $damagerPos = $player->getPosition();
+        $victimPos = $hit->getPosition();
+        
+        // Efectos visuales y sonoros antes del intercambio
+        $player->getWorld()->addParticle($damagerPos, new EndermanTeleportParticle());
+        $hit->getWorld()->addParticle($victimPos, new EndermanTeleportParticle());
+        
+        $player->getWorld()->addSound($damagerPos, new EndermanTeleportSound());
+        $hit->getWorld()->addSound($victimPos, new EndermanTeleportSound());
         
         // Intercambiar posiciones
-        $damager->teleport($victimPos);
-        $victim->teleport($damagerPos);
+        $player->teleport($victimPos);
+        $hit->teleport($damagerPos);
         
-        // Más efectos después del intercambio
-        $damager->getWorld()->addParticle($damager->getPosition(), new EndermanTeleportParticle());
-        $victim->getWorld()->addParticle($victim->getPosition(), new EndermanTeleportParticle());
+        // Efectos después del intercambio
+        $player->getWorld()->addParticle($player->getPosition(), new EndermanTeleportParticle());
+        $hit->getWorld()->addParticle($hit->getPosition(), new EndermanTeleportParticle());
         
-        $this->sendMessage($damager, "§b¡Has intercambiado posiciones con §e{$victim->getName()}§b!");
-        $this->sendMessage($victim, "§b¡§e{$damager->getName()} §bha intercambiado posiciones contigo!");
+        // Mensajes de confirmación
+        $this->sendMessage($player, "§b¡Has intercambiado posiciones con §e{$hit->getName()}§b!");
+        $this->sendMessage($hit, "§b¡§e{$player->getName()} §bha intercambiado posiciones contigo!");
         
-        // Set cooldown
-        $this->setCooldown($damager);
-        
-        // Cancel original damage
-        $event->cancel();
+        // Despawn del proyectil
+        $entity->flagForDespawn();
     }
 }

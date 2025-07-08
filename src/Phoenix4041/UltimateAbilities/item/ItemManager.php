@@ -56,6 +56,20 @@ class ItemManager
         return $this->abilities[$name] ?? null;
     }
     
+    /**
+     * Get ability item (Item object) by name
+     * This is the method your command is calling
+     */
+    public function getAbilityItem(string $name): ?\pocketmine\item\Item
+    {
+        $ability = $this->getAbility($name);
+        if ($ability === null) {
+            return null;
+        }
+        
+        return $ability->getItem();
+    }
+    
     public function getAllAbilities(): array
     {
         return $this->abilities;

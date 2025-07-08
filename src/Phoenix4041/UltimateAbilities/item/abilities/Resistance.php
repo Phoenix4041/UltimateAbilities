@@ -53,7 +53,7 @@ class Resistance extends AbilityItem
             $x = $pos->x + (mt_rand(-10, 10) / 10);
             $y = $pos->y + (mt_rand(0, 15) / 10);
             $z = $pos->z + (mt_rand(-10, 10) / 10);
-            $world->addParticle(new Vector3($x, $y, $z), new BlockBreakParticle(VanillaBlocks::IRON_BLOCK()));
+            $world->addParticle(new Vector3($x, $y, $z), new BlockBreakParticle(VanillaBlocks::IRON()));
         }
         
         $world->addSound($pos, new AnvilUseSound());

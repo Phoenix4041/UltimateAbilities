@@ -1,9 +1,6 @@
 <?php
-
 declare(strict_types=1);
-
 namespace Phoenix4041\UltimateAbilities\item\abilities;
-
 use Phoenix4041\UltimateAbilities\item\AbilityItem;
 use Phoenix4041\UltimateAbilities\provider\Provider;
 use pocketmine\item\VanillaItems;
@@ -11,7 +8,6 @@ use pocketmine\math\Vector3;
 use pocketmine\player\Player;
 use pocketmine\world\particle\EndermanTeleportParticle;
 use pocketmine\world\sound\EndermanTeleportSound;
-
 class TeleportAttack extends AbilityItem
 {
     public function __construct()
@@ -64,7 +60,8 @@ class TeleportAttack extends AbilityItem
         $targetDirection = $nearestPlayer->getDirectionVector();
         
         // Posición detrás del jugador (2 bloques atrás)
-        $teleportPos = $targetPos->subtract($targetDirection->multiply(2));
+        // Fix: Use subtractVector() instead of subtract() when passing a Vector3
+        $teleportPos = $targetPos->subtractVector($targetDirection->multiply(2));
         $teleportPos = $teleportPos->add(0, 1, 0); // Un bloque hacia arriba
         
         // Efectos visuales antes del teletransporte

@@ -12,18 +12,18 @@ use pocketmine\item\VanillaItems;
 use pocketmine\math\Vector3;
 use pocketmine\player\Player;
 
-class Heart extends AbilityItem
+class Fenix extends AbilityItem
 {
     public function __construct()
     {
-        $config = Provider::getAbilityConfig('heart');
+        $config = Provider::getAbilityConfig('fenix');
         parent::__construct(
-            $config['name'] ?? "§c§lHeart",
-            VanillaItems::APPLE(),
-            $config['cooldown'] ?? 60,
+            $config['name'] ?? "§c§lFénix",
+            VanillaItems::GHAST_TEAR(),
+            $config['cooldown'] ?? 90,
             $config['lore'] ?? [
-                "§7Aumenta tu vida máxima",
-                "§7temporalmente",
+                "§7Regenera tu vida completa",
+                "§7y te da resistencia al fuego",
                 "",
                 "§aClick derecho para usar"
             ]
@@ -32,15 +32,15 @@ class Heart extends AbilityItem
     
     public function getAbilityName(): string
     {
-        return "heart";
+        return "fenix";
     }
     
     protected function execute(Player $player, Vector3 $directionVector): void
     {
-        $player->getEffects()->add(new EffectInstance(VanillaEffects::HEALTH_BOOST(), 60 * 20, 2));
-        $player->getEffects()->add(new EffectInstance(VanillaEffects::REGENERATION(), 15 * 20, 1));
         $player->setHealth($player->getMaxHealth());
+        $player->getEffects()->add(new EffectInstance(VanillaEffects::FIRE_RESISTANCE(), 60 * 20, 0));
+        $player->getEffects()->add(new EffectInstance(VanillaEffects::REGENERATION(), 30 * 20, 1));
         
-        $this->sendMessage($player, "§c¡Heart activado! Vida máxima aumentada temporalmente!");
+        $this->sendMessage($player, "§c¡Fénix activado! Vida completa y resistencia al fuego!");
     }
 }

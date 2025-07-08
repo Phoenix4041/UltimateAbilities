@@ -11,8 +11,6 @@ use pocketmine\entity\effect\VanillaEffects;
 use pocketmine\item\VanillaItems;
 use pocketmine\math\Vector3;
 use pocketmine\player\Player;
-use pocketmine\world\particle\SmokeParticle;
-use pocketmine\world\sound\FizzSound;
 
 class Coffee extends AbilityItem
 {
@@ -21,11 +19,11 @@ class Coffee extends AbilityItem
         $config = Provider::getAbilityConfig('coffee');
         parent::__construct(
             $config['name'] ?? "§6§lCoffee",
-            VanillaItems::BROWN_DYE(),
-            $config['cooldown'] ?? 50,
+            VanillaItems::COCOA_BEANS(),
+            $config['cooldown'] ?? 60,
             $config['lore'] ?? [
                 "§7Te da energía y velocidad",
-                "§7de minado durante 45 segundos",
+                "§7para minar más rápido",
                 "",
                 "§aClick derecho para usar"
             ]
@@ -40,20 +38,8 @@ class Coffee extends AbilityItem
     protected function execute(Player $player, Vector3 $directionVector): void
     {
         $player->getEffects()->add(new EffectInstance(VanillaEffects::SPEED(), 45 * 20, 1));
-        $player->getEffects()->add(new EffectInstance(VanillaEffects::HASTE(), 45 * 20, 2));
-        $player->getEffects()->add(new EffectInstance(VanillaEffects::JUMP_BOOST(), 45 * 20, 0));
+        $player->getEffects()->add(new EffectInstance(VanillaEffects::HASTE(), 45 * 20, 1));
         
-        $world = $player->getWorld();
-        $pos = $player->getPosition();
-        
-        for ($i = 0; $i < 10; $i++) {
-            $x = $pos->x + (mt_rand(-5, 5) / 10);
-            $y = $pos->y + (mt_rand(0, 10) / 10);
-            $z = $pos->z + (mt_rand(-5, 5) / 10);
-            $world->addParticle(new Vector3($x, $y, $z), new SmokeParticle());
-        }
-        
-        $world->addSound($pos, new FizzSound());
-        $this->sendMessage($player, "§6¡Coffee activado! Energía y velocidad de minado mejoradas!");
+        $this->sendMessage($player, "§6¡Coffee activado! Speed y Haste por 45 segundos!");
     }
 }

@@ -21,7 +21,7 @@ class UltraInstinct extends AbilityItem
         $config = Provider::getAbilityConfig('ultrainstinct');
         parent::__construct(
             $config['name'] ?? "§d§lUltra Instinct",
-            VanillaItems::LIGHT_GRAY_DYE(),
+            VanillaItems::FEATHER(),
             $config['cooldown'] ?? 60,
             $config['lore'] ?? [
                 "§7Aumenta tu velocidad y",

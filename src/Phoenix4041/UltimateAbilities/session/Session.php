@@ -1,5 +1,4 @@
 <?php
-
 declare(strict_types=1);
 
 namespace Phoenix4041\UltimateAbilities\session;
@@ -39,6 +38,11 @@ class Session
         }
         
         return $this->cooldowns[$ability] - time();
+    }
+    
+    public function getRemainingCooldown(string $ability): int
+    {
+        return $this->getCooldownTime($ability);
     }
     
     public function setEffect(string $effect, int $seconds): void
@@ -102,5 +106,21 @@ class Session
                 unset($this->effects[$effect]);
             }
         }
+    }
+    
+    public function clearAllCooldowns(): void
+    {
+        $this->cooldowns = [];
+    }
+    
+    public function clearAllEffects(): void
+    {
+        $this->effects = [];
+    }
+    
+    public function updateCooldowns(): void
+    {
+        $this->clearExpiredCooldowns();
+        $this->clearExpiredEffects();
     }
 }
