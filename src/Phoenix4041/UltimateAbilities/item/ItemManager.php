@@ -23,37 +23,46 @@ use Phoenix4041\UltimateAbilities\item\abilities\GemaPoder;
 
 class ItemManager
 {
-    /** @var AbilityItem[] */
-    private array $abilities = [];
+    /** @var array */
+    private array $abilityClasses = [];
     
     public function __construct()
     {
-        $this->registerAbilities();
+        $this->registerAbilityClasses();
     }
     
-    private function registerAbilities(): void
+    private function registerAbilityClasses(): void
     {
-        $this->abilities['antipearl'] = new AntiPearl();
-        $this->abilities['switcher'] = new Switcher();
-        $this->abilities['ultrainstinct'] = new UltraInstinct();
-        $this->abilities['teleportattack'] = new TeleportAttack();
-        $this->abilities['strength'] = new Strength();
-        $this->abilities['resistance'] = new Resistance();
-        $this->abilities['redbull'] = new RedBull();
-        $this->abilities['antitrapper'] = new AntiTrapper();
-        $this->abilities['fenix'] = new Fenix();
-        $this->abilities['megainstinct'] = new MegaInstinct();
-        $this->abilities['heart'] = new Heart();
-        $this->abilities['coffee'] = new Coffee();
-        $this->abilities['alcohol'] = new Alcohol();
-        $this->abilities['antigapple'] = new AntiGapple();
-        $this->abilities['gemamente'] = new GemaMente();
-        $this->abilities['gemapoder'] = new GemaPoder();
+        // En lugar de instanciar las habilidades, guardamos sus clases
+        $this->abilityClasses = [
+            'antipearl' => AntiPearl::class,
+            'switcher' => Switcher::class,
+            'ultrainstinct' => UltraInstinct::class,
+            'teleportattack' => TeleportAttack::class,
+            'strength' => Strength::class,
+            'resistance' => Resistance::class,
+            'redbull' => RedBull::class,
+            'antitrapper' => AntiTrapper::class,
+            'fenix' => Fenix::class,
+            'megainstinct' => MegaInstinct::class,
+            'heart' => Heart::class,
+            'coffee' => Coffee::class,
+            'alcohol' => Alcohol::class,
+            'antigapple' => AntiGapple::class,
+            'gemamente' => GemaMente::class,
+            'gemapoder' => GemaPoder::class,
+        ];
     }
     
     public function getAbility(string $name): ?AbilityItem
     {
-        return $this->abilities[$name] ?? null;
+        if (!isset($this->abilityClasses[$name])) {
+            return null;
+        }
+        
+        $className = $this->abilityClasses[$name];
+        // Crear nueva instancia cada vez para obtener configuración actualizada
+        return new $className();
     }
     
     /**
@@ -72,12 +81,16 @@ class ItemManager
     
     public function getAllAbilities(): array
     {
-        return $this->abilities;
+        $abilities = [];
+        foreach ($this->abilityClasses as $name => $class) {
+            $abilities[$name] = new $class();
+        }
+        return $abilities;
     }
     
     public function getAbilityNames(): array
     {
-        return array_keys($this->abilities);
+        return array_keys($this->abilityClasses);
     }
     
     public function createAbilityItem(string $abilityName): ?\pocketmine\item\Item
@@ -88,5 +101,14 @@ class ItemManager
         }
         
         return $ability->getItem();
+    }
+    
+    /**
+     * Reload all abilities (useful for config changes)
+     */
+    public function reloadAbilities(): void
+    {
+        // No necesitamos hacer nada especial aquí ya que las instancias
+        // se crean dinámicamente y leerán la configuración actualizada
     }
 }

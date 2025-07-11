@@ -6,6 +6,7 @@ namespace Phoenix4041\UltimateAbilities\item\abilities;
 
 use Phoenix4041\UltimateAbilities\item\AbilityItem;
 use Phoenix4041\UltimateAbilities\provider\Provider;
+use Phoenix4041\UltimateAbilities\UltimateAbilities;
 use pocketmine\entity\effect\EffectInstance;
 use pocketmine\entity\effect\VanillaEffects;
 use pocketmine\item\VanillaItems;
@@ -16,17 +17,34 @@ class Alcohol extends AbilityItem
 {
     public function __construct()
     {
+        // Cargar configuración
         $config = Provider::getAbilityConfig('alcohol');
+        
+        // DEBUG: Log para ver qué valores se están cargando
+        $plugin = UltimateAbilities::getInstance();
+        $plugin->getLogger()->info("DEBUG - Alcohol config loaded:");
+        $plugin->getLogger()->info("Name: " . ($config['name'] ?? 'NOT FOUND'));
+        $plugin->getLogger()->info("Cooldown: " . ($config['cooldown'] ?? 'NOT FOUND'));
+        $plugin->getLogger()->info("Lore lines: " . (isset($config['lore']) ? count($config['lore']) : 'NOT FOUND'));
+        
+        // Valores por defecto más claros
+        $name = $config['name'] ?? "§5§lAlcohol";
+        $cooldown = $config['cooldown'] ?? 30;
+        $lore = $config['lore'] ?? [
+            "§7Te da visión nocturna pero",
+            "§7reduce tu precisión",
+            "",
+            "§aClick derecho para usar"
+        ];
+        
+        // Log del cooldown final que se usará
+        $plugin->getLogger()->info("DEBUG - Final cooldown being used: " . $cooldown);
+        
         parent::__construct(
-            $config['name'] ?? "§5§lAlcohol",
+            $name,
             VanillaItems::POTION(),
-            $config['cooldown'] ?? 30,
-            $config['lore'] ?? [
-                "§7Te da visión nocturna pero",
-                "§7reduce tu precisión",
-                "",
-                "§aClick derecho para usar"
-            ]
+            $cooldown,
+            $lore
         );
     }
     
@@ -37,10 +55,15 @@ class Alcohol extends AbilityItem
     
     protected function execute(Player $player, Vector3 $directionVector): void
     {
+        // También log cuando se ejecuta para verificar el cooldown
+        $plugin = UltimateAbilities::getInstance();
+        $plugin->getLogger()->info("DEBUG - Alcohol executed, cooldown should be: " . $this->getCooldown());
+        
         $player->getEffects()->add(new EffectInstance(VanillaEffects::NIGHT_VISION(), 60 * 20, 0));
         $player->getEffects()->add(new EffectInstance(VanillaEffects::NAUSEA(), 15 * 20, 0));
         $player->getEffects()->add(new EffectInstance(VanillaEffects::SLOWNESS(), 20 * 20, 0));
         
         $this->sendMessage($player, "§5¡Alcohol activado! Visión nocturna pero con efectos secundarios!");
+        $this->sendMessage($player, "§7Cooldown: " . $this->getCooldown() . " segundos");
     }
 }
