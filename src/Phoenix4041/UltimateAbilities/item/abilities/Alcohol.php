@@ -17,11 +17,22 @@ class Alcohol extends AbilityItem
 {
     public function __construct()
     {
+        // DEBUG: Verificar si el archivo existe y su contenido
+        $plugin = UltimateAbilities::getInstance();
+        $configPath = $plugin->getDataFolder() . "config.yml";
+        
+        $plugin->getLogger()->info("DEBUG - Config file path: " . $configPath);
+        $plugin->getLogger()->info("DEBUG - Config file exists: " . (file_exists($configPath) ? "YES" : "NO"));
+        
+        if (file_exists($configPath)) {
+            $fileContent = file_get_contents($configPath);
+            $plugin->getLogger()->info("DEBUG - Config file content (first 500 chars): " . substr($fileContent, 0, 500));
+        }
+        
         // Cargar configuración
         $config = Provider::getAbilityConfig('alcohol');
         
         // DEBUG: Log para ver qué valores se están cargando
-        $plugin = UltimateAbilities::getInstance();
         $plugin->getLogger()->info("DEBUG - Alcohol config loaded:");
         $plugin->getLogger()->info("Name: " . ($config['name'] ?? 'NOT FOUND'));
         $plugin->getLogger()->info("Cooldown: " . ($config['cooldown'] ?? 'NOT FOUND'));
