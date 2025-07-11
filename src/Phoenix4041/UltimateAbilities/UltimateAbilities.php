@@ -29,6 +29,7 @@ use pocketmine\item\EnderPearl;
 use pocketmine\player\Player;
 use pocketmine\plugin\PluginBase;
 use pocketmine\utils\SingletonTrait;
+use pocketmine\utils\Config;
 use ReflectionException;
 use Phoenix4041\UltimateAbilities\listener\AntiTrapperListener;
 use Phoenix4041\UltimateAbilities\listener\AntiGappleListener;
@@ -41,6 +42,7 @@ class UltimateAbilities extends PluginBase
     
     private ItemManager $itemManager;
     private SessionManager $sessionManager;
+    private Config $config;
     
     protected function onLoad(): void
     {
@@ -53,6 +55,9 @@ class UltimateAbilities extends PluginBase
     protected function onEnable(): void
     {
         $this->saveResource("config.yml");
+        
+        // Cargar configuración
+        $this->config = $this->getConfig();
         
         # Register invmenu 
         if (!InvMenuHandler::isRegistered()) {
@@ -101,9 +106,61 @@ class UltimateAbilities extends PluginBase
         }, ['SwitcherEntity']);
     }
     
+    /**
+     * Obtener información de habilidad desde el config
+     */
+    public function getAbilityConfig(string $abilityName): ?array
+    {
+        $abilityData = $this->config->get($abilityName);
+        if ($abilityData === null || !is_array($abilityData)) {
+            return null;
+        }
+        
+        return $abilityData;
+    }
+    
+    /**
+     * Obtener cooldown de habilidad desde el config
+     */
+    public function getAbilityCooldown(string $abilityName): int
+    {
+        $abilityData = $this->getAbilityConfig($abilityName);
+        if ($abilityData === null) {
+            return 30; // Cooldown por defecto
+        }
+        
+        return (int)($abilityData['cooldown'] ?? 30);
+    }
+    
+    /**
+     * Obtener nombre de habilidad desde el config
+     */
+    public function getAbilityName(string $abilityName): string
+    {
+        $abilityData = $this->getAbilityConfig($abilityName);
+        if ($abilityData === null) {
+            return $abilityName; // Nombre por defecto
+        }
+        
+        return $abilityData['name'] ?? $abilityName;
+    }
+    
+    /**
+     * Obtener lore de habilidad desde el config
+     */
+    public function getAbilityLore(string $abilityName): array
+    {
+        $abilityData = $this->getAbilityConfig($abilityName);
+        if ($abilityData === null) {
+            return []; // Lore vacío por defecto
+        }
+        
+        return $abilityData['lore'] ?? [];
+    }
+    
     private function registerEvents(): void
     {
-        # Player item use event - MODIFICADO PARA CONSUMIR EL ÍTEM
+        # Player item use event - MODIFICADO PARA USAR CONFIG
         $this->getServer()->getPluginManager()->registerEvent(PlayerItemUseEvent::class, function (PlayerItemUseEvent $event): void {
             $player = $event->getPlayer();
             $item = $event->getItem();
@@ -114,7 +171,6 @@ class UltimateAbilities extends PluginBase
                 if ($session !== null && $session->hasEffect('antipearl')) {
                     $event->cancel();
                     $player->sendMessage("§c¡No puedes usar ender pearls! Estás bajo el efecto Anti-Pearl!");
-
                     return;
                 }
             }
@@ -126,7 +182,7 @@ class UltimateAbilities extends PluginBase
                 if ($ability !== null) {
                     $session = $this->sessionManager->getSession($player);
                     
-                    // Verificar cooldown
+                    // Verificar cooldown usando la configuración
                     if ($session !== null && $session->hasCooldown($abilityName)) {
                         $remaining = $session->getRemainingCooldown($abilityName);
                         $player->sendMessage("§cDebes esperar {$remaining} segundos para usar esta habilidad!");
@@ -136,7 +192,13 @@ class UltimateAbilities extends PluginBase
                     // Usar la habilidad
                     $ability->onUse($player, $event->getDirectionVector());
                     
-                    // CONSUMIR EL ÍTEM - Esta es la parte nueva
+                    // Aplicar cooldown desde el config
+                    $cooldown = $this->getAbilityCooldown($abilityName);
+                    if ($session !== null) {
+                        $session->setCooldown($abilityName, $cooldown);
+                    }
+                    
+                    // CONSUMIR EL ÍTEM
                     $this->consumeItem($player);
                 }
             }
@@ -188,7 +250,7 @@ class UltimateAbilities extends PluginBase
             }
         }, EventPriority::NORMAL, $this);
         
-        # Projectile hit events - CORREGIDO PARA PM5
+        # Projectile hit events - CORREGIDO PARA USAR CONFIG DE SWITCHER
         $this->getServer()->getPluginManager()->registerEvent(ProjectileHitBlockEvent::class, function (ProjectileHitBlockEvent $event): void {
             $projectile = $event->getEntity();
             $owner = $projectile->getOwningEntity();
@@ -197,7 +259,7 @@ class UltimateAbilities extends PluginBase
                 return;
             }
             
-            // Verificar si es un proyectil de switcher usando NBT - CORREGIDO PARA PM5
+            // Verificar si es un proyectil de switcher usando NBT
             $nbt = $projectile->saveNBT();
             if ($nbt->getTag('switcher_projectile') === null) {
                 return;
@@ -206,7 +268,7 @@ class UltimateAbilities extends PluginBase
             $hitBlock = $event->getBlockHit();
             $hitPos = $hitBlock->getPosition();
             
-            // Verificar cooldown del switcher
+            // Verificar cooldown del switcher usando config
             $session = $this->sessionManager->getSession($owner);
             if ($session !== null && $session->hasCooldown('switcher')) {
                 $remaining = $session->getRemainingCooldown('switcher');
@@ -228,9 +290,10 @@ class UltimateAbilities extends PluginBase
                 $owner->getWorld()->addSound($owner->getPosition(), new \pocketmine\world\sound\EndermanTeleportSound());
             }
             
-            // Aplicar cooldown
+            // Aplicar cooldown desde el config
             if ($session !== null) {
-                $session->setCooldown('switcher', 25);
+                $cooldown = $this->getAbilityCooldown('switcher');
+                $session->setCooldown('switcher', $cooldown);
             }
             
             $owner->sendMessage("§b¡Te has teletransportado al bloque!");
@@ -248,14 +311,14 @@ class UltimateAbilities extends PluginBase
                 return;
             }
             
-            // Verificar si es un proyectil de switcher usando NBT - CORREGIDO PARA PM5
+            // Verificar si es un proyectil de switcher usando NBT
             $nbt = $projectile->saveNBT();
             if ($nbt->getTag('switcher_projectile') === null) {
                 return;
             }
             
             if ($hitEntity instanceof Player) {
-                // Verificar cooldown del switcher
+                // Verificar cooldown del switcher usando config
                 $session = $this->sessionManager->getSession($owner);
                 if ($session !== null && $session->hasCooldown('switcher')) {
                     $remaining = $session->getRemainingCooldown('switcher');
@@ -288,9 +351,10 @@ class UltimateAbilities extends PluginBase
                     $hitEntity->getWorld()->addSound($hitEntityPos, new \pocketmine\world\sound\EndermanTeleportSound());
                 }
                 
-                // Aplicar cooldown
+                // Aplicar cooldown desde el config
                 if ($session !== null) {
-                    $session->setCooldown('switcher', 25);
+                    $cooldown = $this->getAbilityCooldown('switcher');
+                    $session->setCooldown('switcher', $cooldown);
                 }
                 
                 $owner->sendMessage("§b¡Has intercambiado posiciones con §e{$hitEntity->getName()}§b!");
@@ -340,6 +404,7 @@ class UltimateAbilities extends PluginBase
     public function reloadConfigs(): void
     {
         $this->reloadConfig();
+        $this->config = $this->getConfig(); // Recargar la configuración
         Provider::reload();
         $this->getLogger()->info("Configuraciones recargadas");
     }
